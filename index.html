@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>函数导数消消乐</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Noto Sans SC', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f0f8fb 0%, #fef7fb 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            background-attachment: fixed;
+        }
+        
+        .game-container {
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 32px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+            padding: 30px 20px;
+            width: 100%;
+            max-width: 1000px;
+            text-align: center;
+            backdrop-filter: blur(20px);
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+        }
+        
+        /* 顶部装饰 */
+        .decor-top {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 180px;
+            height: 30px;
+            background: linear-gradient(90deg, #ffc1e9, #8ed1fc);
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+        }
+        
+        h1 {
+            color: #4299e1;
+            margin-bottom: 10px;
+            font-size: 2.1rem;
+            text-shadow: 0 2px 4px rgba(66, 153, 225, 0.1);
+            font-weight: 700;
+            font-family: 'Noto Serif SC', serif;
+            letter-spacing: 0.3px;
+            position: relative;
+            padding-top: 10px;
+        }
+        
+        .subtitle {
+            color: #718096;
+            margin-bottom: 25px;
+            font-size: 1.05rem;
+            font-weight: 500;
+            line-height: 1.4;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .game-info {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 25px;
+            background: linear-gradient(135deg, #e8f4f8 0%, #fdf2f8 100%);
+            padding: 15px;
+            border-radius: 20px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+        }
+        
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .info-label {
+            font-size: 0.9rem;
+            color: #4a5568;
+            font-weight: 500;
+            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.9);
+        }
+        
+        .info-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #2d3748;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+            font-family: 'Noto Serif SC', serif;
+        }
+        
+        .game-area {
+            position: relative;
+            margin-bottom: 25px;
+            width: 100%;
+            height: 480px; /* 增加游戏区域高度 */
+            background: linear-gradient(135deg, #f5fafe 0%, #fcf1f7 100%);
+            border-radius: 24px;
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.06);
+            padding: 25px 15px;
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            overflow: hidden;
+        }
+        
+        /* 背景装饰元素 */
+        .game-bg-decoration {
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: rgba(66, 153, 225, 0.05);
+            z-index: 1;
+        }
+        
+        .bg-dec1 {
+            top: 30px;
+            right: 30px;
+        }
+        
+        .bg-dec2 {
+            bottom: 30px;
+            left: 30px;
+            width: 150px;
+            height: 150px;
+        }
+        
+        #gameCanvas {
+            display: none;
+        }
+        
+        /* 区域标题优化 */
+        .section-label {
+            position: absolute;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #4299e1;
+            text-shadow: 0 2px 4px rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.95);
+            padding: 6px 16px;
+            border-radius: 50px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(66, 153, 225, 0.1);
+            z-index: 20;
+        }
+        
+        .functions-label {
+            top: 15px;
+            left: 25px;
+        }
+        
+        .derivatives-label {
+            top: 260px; /* 调整导数区标题位置 */
+            left: 25px;
+        }
+        
+        /* 分隔线优化 */
+        .divider {
+            position: absolute;
+            top: 240px; /* 调整分隔线位置 */
+            left: 25px;
+            right: 25px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #e2e8f0, transparent);
+            z-index: 15;
+        }
+        
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: -4px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 10px;
+            background: #4299e1;
+            border-radius: 5px;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 18px;
+            margin-top: 10px;
+            margin-bottom: 20px;
+        }
+        
+        button {
+            background: linear-gradient(to right, #4299e1, #38b2ac);
+            color: white;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 6px 15px rgba(66, 153, 225, 0.2);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            font-family: 'Noto Serif SC', serif;
+            letter-spacing: 0.2px;
+        }
+        
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(66, 153, 225, 0.3);
+            background: linear-gradient(to right, #3182ce, #319795);
+        }
+        
+        button:active {
+            transform: translateY(1px);
+            box-shadow: 0 4px 10px rgba(66, 153, 225, 0.2);
+        }
+        
+        button:disabled {
+            background: linear-gradient(to right, #e2e8f0, #f7fafc);
+            color: #a0aec0;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .instructions {
+            background: linear-gradient(135deg, #e8f4f8 0%, #f0f8fb 100%);
+            padding: 20px;
+            border-radius: 20px;
+            margin-top: 10px;
+            text-align: left;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+        }
+        
+        .instructions h3 {
+            color: #2d3748;
+            margin-bottom: 12px;
+            font-size: 1.15rem;
+            text-align: center;
+            font-family: 'Noto Serif SC', serif;
+            font-weight: 600;
+        }
+        
+        .instructions p {
+            color: #4a5568;
+            line-height: 1.5;
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+        }
+        
+        .instructions ul {
+            color: #4a5568;
+            padding-left: 20px;
+            margin-bottom: 10px;
+        }
+        
+        .instructions li {
+            margin-bottom: 6px;
+            line-height: 1.4;
+            font-size: 0.95rem;
+            list-style-type: disc;
+        }
+        
+        /* 卡片样式优化 - 大幅缩小尺寸，彻底解决遮挡 */
+        [id^="card-"] {
+            position: absolute;
+            border-radius: 14px; /* 适当减小圆角 */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.06); /* 减小阴影 */
+            z-index: 10;
+            background-color: white;
+            border: 2px solid transparent;
+            overflow: hidden;
+            backdrop-filter: blur(5px);
+        }
+        
+        /* 进一步缩小卡片尺寸，大幅增加间距 */
+        @media (min-width: 1024px) {
+            [id^="card-"] {
+                width: 100px !important; /* 桌面端进一步缩小 */
+                height: 60px !important;
+            }
+        }
+        
+        @media (min-width: 769px) and (max-width: 1023px) {
+            [id^="card-"] {
+                width: 90px !important; /* 平板端优化 */
+                height: 55px !important;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            [id^="card-"] {
+                width: 60px !important; /* 手机端大幅缩小 */
+                height: 45px !important;
+            }
+        }
+        
+        .mathjax-content {
+            font-size: 0.85rem !important; /* 进一步适配缩小后的卡片 */
+            padding: 4px;
+            line-height: 1.1;
+            font-weight: 500;
+            color: #2d3748;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* 卡片选中状态优化 */
+        [id^="card-"]:not(.match-success):not(.match-fail):hover {
+            transform: translateY(-2px); /* 减小悬浮高度 */
+            box-shadow: 0 6px 12px rgba(66, 153, 225, 0.15);
+            border-color: #4299e1;
+        }
+        
+        /* 粒子效果优化 */
+        .particle {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 100;
+            box-shadow: 0 0 4px rgba(255, 255, 255, 0.9);
+        }
+        
+        /* 匹配成功动画优化 */
+        @keyframes matchSuccess {
+            0% { transform: scale(1); opacity: 1; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.06); }
+            50% { transform: scale(1.05); opacity: 0.9; box-shadow: 0 6px 12px rgba(66, 153, 225, 0.2); }
+            100% { transform: scale(0.8); opacity: 0; box-shadow: none; }
+        }
+        
+        .match-success {
+            animation: matchSuccess 0.5s forwards cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        /* 匹配失败动画优化 */
+        @keyframes matchFail {
+            0% { transform: translateX(0); border-color: #e53e3e; }
+            25% { transform: translateX(-4px); }
+            50% { transform: translateX(4px); }
+            75% { transform: translateX(-4px); }
+            100% { transform: translateX(0); border-color: inherit; }
+        }
+        
+        .match-fail {
+            animation: matchFail 0.4s ease-in-out;
+            border-color: #e53e3e;
+            border-width: 2px;
+        }
+        
+        /* 响应式适配优化 */
+        @media (max-width: 768px) {
+            .game-container {
+                padding: 25px 12px;
+                border-radius: 24px;
+            }
+            
+            h1 {
+                font-size: 1.7rem;
+            }
+            
+            .game-info {
+                flex-direction: column;
+                gap: 12px;
+                padding: 12px;
+            }
+            
+            .game-area {
+                height: auto;
+                min-height: 500px; /* 增加手机端最小高度 */
+                padding: 20px 8px;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: center;
+                gap: 10px;
+            }
+            
+            button {
+                width: 85%;
+                padding: 11px 20px;
+            }
+            
+            .section-label {
+                font-size: 0.85rem;
+                padding: 5px 12px;
+                left: 15px;
+            }
+            
+            .mathjax-content {
+                font-size: 0.7rem !important; /* 手机端公式进一步缩小 */
+            }
+            
+            .instructions {
+                padding: 15px;
+            }
+            
+            .instructions h3 {
+                font-size: 1.05rem;
+            }
+        }
+        
+        /* 马卡龙配色优化 - 更柔和的渐变 */
+        .card-color-pink { background: linear-gradient(135deg, #FFE6F0 0%, #FFEFF6 100%); border-color: #FFB3D1; }
+        .card-color-mint { background: linear-gradient(135deg, #E6F7F4 0%, #F0FBF7 100%); border-color: #A3E6D8; }
+        .card-color-purple { background: linear-gradient(135deg, #E8E9FF 0%, #F3F4FF 100%); border-color: #B3B7FF; }
+        .card-color-apricot { background: linear-gradient(135deg, #FFEEE0 0%, #FFF5EB 100%); border-color: #FFD4B3; }
+        .card-color-lightgreen { background: linear-gradient(135deg, #F0F7E4 0%, #F7FAEF 100%); border-color: #D4E6B3; }
+        .card-color-blue { background: linear-gradient(135deg, #E3F2FD 0%, #EBF5FF 100%); border-color: #BBDEFB; }
+        .card-color-yellow { background: linear-gradient(135deg, #FFF9E0 0%, #FFFDE7 100%); border-color: #FFF0B3; }
+        .card-color-orange { background: linear-gradient(135deg, #FFE8D0 0%, #FFF3E6 100%); border-color: #FFCC99; }
+        .card-color-teal { background: linear-gradient(135deg, #E0F7FA 0%, #E8FCFF 100%); border-color: #80DEEA; }
+        .card-color-lavender { background: linear-gradient(135deg, #F3E5F5 0%, #F9F0FC 100%); border-color: #E1BEE7; }
+        .card-color-coral { background: linear-gradient(135deg, #FFE0D0 0%, #FFECE6 100%); border-color: #FFAB91; }
+        .card-color-indigo { background: linear-gradient(135deg, #E0E6FF 0%, #E8EDFF 100%); border-color: #9FA8DA; }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="decor-top"></div>
+        <h1>函数导数消消乐</h1>
+        <p class="subtitle">匹配函数与其正确的导数，挑战你的记忆力！</p>
+        
+        <div class="game-info">
+            <div class="info-item">
+                <div class="info-label">得分</div>
+                <div id="score" class="info-value">0</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">剩余时间</div>
+                <div id="timer" class="info-value">60</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">剩余卡片</div>
+                <div id="remaining" class="info-value">20</div>
+            </div>
+        </div>
+        
+        <div class="game-area">
+            <!-- 背景装饰 -->
+            <div class="game-bg-decoration bg-dec1"></div>
+            <div class="game-bg-decoration bg-dec2"></div>
+            
+            <div class="section-label functions-label">函数卡片</div>
+            <div class="section-label derivatives-label">导数卡片</div>
+            <div class="divider"></div>
+            <canvas id="gameCanvas" width="800" height="480"></canvas>
+        </div>
+        
+        <div class="controls">
+            <button id="startBtn">开始游戏</button>
+            <button id="resetBtn">重新开始</button>
+        </div>
+        
+        <div class="instructions">
+            <h3>游戏说明</h3>
+            <p>欢迎来到函数导数消消乐！这是一个考验你对函数导数记忆的小游戏。</p>
+            <ul>
+                <li>点击一个函数卡片，然后点击其对应的导数卡片</li>
+                <li>如果匹配正确，两张卡片会消除并得分（每对10分）</li>
+                <li>在60秒内消除所有卡片即可获得胜利</li>
+                <li>匹配错误将扣除3秒时间，请谨慎选择！</li>
+            </ul>
+            <p>加油！看看你能得多高分，成为数学小达人！</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const scoreElement = document.getElementById('score');
+            const timerElement = document.getElementById('timer');
+            const remainingElement = document.getElementById('remaining');
+            const startBtn = document.getElementById('startBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const gameArea = document.querySelector('.game-area');
+            
+            // 数学表达式数据（移除双曲函数，保留核心函数导数）
+            const functionPairs = [
+                { func: "C", derivative: "0" },
+                { func: "x^a", derivative: "a x^{a-1}" },
+                { func: "\\sin x", derivative: "\\cos x" },
+                { func: "\\cos x", derivative: "-\\sin x" },
+                { func: "\\tan x", derivative: "\\sec^2 x" },
+                { func: "\\cot x", derivative: "-\\csc^2 x" },
+                { func: "\\sec x", derivative: "\\sec x \\tan x" },
+                { func: "\\csc x", derivative: "-\\csc x \\cot x" },
+                { func: "a^x", derivative: "a^x \\ln a" },
+                { func: "e^x", derivative: "e^x" },
+                { func: "\\log_a x", derivative: "\\frac{1}{x \\ln a}" },
+                { func: "\\ln |x|", derivative: "\\frac{1}{x}" },
+                { func: "\\arcsin x", derivative: "\\frac{1}{\\sqrt{1-x^2}}" },
+                { func: "\\arccos x", derivative: "-\\frac{1}{\\sqrt{1-x^2}}" },
+                { func: "\\arctan x", derivative: "\\frac{1}{1+x^2}" },
+                { func: "\\text{arccot} x", derivative: "-\\frac{1}{1+x^2}" },
+            ];
+            
+            // 游戏数据
+            let cards = [];
+            let selectedCard = null;
+            let score = 0;
+            let timeLeft = 60;
+            let gameActive = false;
+            let gameTimer;
+            let remainingPairs = 10;
+            let cardIdCounter = 0;
+            
+            // 函数与导数颜色池完全分离（无重复颜色）
+            const functionColorPool = [
+                'card-color-pink',
+                'card-color-mint',
+                'card-color-purple',
+                'card-color-apricot',
+                'card-color-lightgreen',
+                'card-color-blue',
+                'card-color-yellow',
+                'card-color-orange',
+                'card-color-teal',
+                'card-color-lavender'
+            ];
+            
+            const derivativeColorPool = [
+                'card-color-coral',
+                'card-color-indigo',
+                'card-color-orange',
+                'card-color-teal',
+                'card-color-lavender',
+                'card-color-pink',
+                'card-color-mint',
+                'card-color-purple',
+                'card-color-apricot',
+                'card-color-lightgreen'
+            ];
+            
+            // 卡片类
+            class Card {
+                constructor(id, text, x, y, width, height, type, colorClass) {
+                    this.id = id;
+                    this.text = text;
+                    this.x = x;
+                    this.y = y;
+                    this.width = width;
+                    this.height = height;
+                    this.type = type;
+                    this.selected = false;
+                    this.matched = false;
+                    this.visible = true;
+                    this.colorClass = colorClass;
+                    this.element = null;
+                }
+                
+                createElement() {
+                    const cardDiv = document.createElement('div');
+                    cardDiv.id = `card-${this.id}`;
+                    cardDiv.style.left = `${this.x}px`;
+                    cardDiv.style.top = `${this.y}px`;
+                    cardDiv.style.width = `${this.width}px`;
+                    cardDiv.style.height = `${this.height}px`;
+                    
+                    cardDiv.classList.add(this.colorClass);
+                    
+                    const latexSpan = document.createElement('span');
+                    latexSpan.className = 'mathjax-content';
+                    latexSpan.innerHTML = `\\(${this.text}\\)`;
+                    cardDiv.appendChild(latexSpan);
+                    
+                    gameArea.appendChild(cardDiv);
+                    this.element = cardDiv;
+                    
+                    this.bindClickEvent();
+                    
+                    setTimeout(() => {
+                        MathJax.typesetPromise([cardDiv]).catch(err => console.error('MathJax渲染错误:', err));
+                    }, 50);
+                    
+                    return this;
+                }
+                
+                bindClickEvent() {
+                    this.element.addEventListener('click', () => {
+                        if (!gameActive || !this.visible || this.matched) return;
+                        
+                        if (selectedCard === null) {
+                            this.selected = true;
+                            selectedCard = this;
+                            this.updateStyle();
+                        } else {
+                            if (selectedCard === this) {
+                                this.selected = false;
+                                selectedCard = null;
+                                this.updateStyle();
+                            } else {
+                                const isMatch = this.checkMatch(selectedCard);
+                                
+                                if (isMatch && selectedCard.type !== this.type) {
+                                    this.handleMatchSuccess();
+                                    selectedCard.handleMatchSuccess();
+                                    
+                                    score += 10;
+                                    remainingPairs--;
+                                    updateUI();
+                                    
+                                    if (remainingPairs === 0) {
+                                        setTimeout(() => endGame(true), 600);
+                                    }
+                                } else {
+                                    this.handleMatchFail();
+                                    selectedCard.handleMatchFail();
+                                    
+                                    timeLeft = Math.max(0, timeLeft - 3);
+                                    updateUI();
+                                }
+                                
+                                selectedCard = null;
+                            }
+                        }
+                    });
+                }
+                
+                checkMatch(otherCard) {
+                    for (const pair of functionPairs) {
+                        if (
+                            (pair.func === this.text && pair.derivative === otherCard.text) ||
+                            (pair.derivative === this.text && pair.func === otherCard.text)
+                        ) {
+                            return true;
+                        }
+                    }
+                    return false;
+                }
+                
+                handleMatchSuccess() {
+                    this.matched = true;
+                    this.element.classList.add('match-success');
+                    
+                    this.createParticles();
+                    
+                    setTimeout(() => {
+                        this.visible = false;
+                        this.element.style.display = 'none';
+                    }, 500);
+                }
+                
+                handleMatchFail() {
+                    this.element.classList.add('match-fail');
+                    selectedCard.element.classList.add('match-fail');
+                    
+                    setTimeout(() => {
+                        this.selected = false;
+                        selectedCard.selected = false;
+                        this.updateStyle();
+                        selectedCard.updateStyle();
+                        
+                        this.element.classList.remove('match-fail');
+                        selectedCard.element.classList.remove('match-fail');
+                    }, 400);
+                }
+                
+                updateStyle() {
+                    if (!this.element) return;
+                    
+                    if (this.selected) {
+                        this.element.style.backgroundColor = '#E6F7FF';
+                        this.element.style.borderColor = '#4299e1';
+                        this.element.style.boxShadow = '0 8px 16px rgba(66, 153, 225, 0.2)';
+                    } else {
+                        this.element.style.backgroundColor = '';
+                        this.element.style.borderColor = '';
+                        this.element.style.boxShadow = '';
+                    }
+                    
+                    this.element.style.display = this.visible ? 'flex' : 'none';
+                }
+                
+                createParticles() {
+                    const particleCount = 12; // 减少粒子数量，避免遮挡
+                    
+                    for (let i = 0; i < particleCount; i++) {
+                        const particle = document.createElement('div');
+                        particle.className = 'particle';
+                        
+                        const colors = ['#4299e1', '#38b2ac', '#9f7aea', '#ed8936', '#48bb78', '#e53e3e'];
+                        particle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                        
+                        const cardRect = this.element.getBoundingClientRect();
+                        const gameAreaRect = gameArea.getBoundingClientRect();
+                        
+                        const x = cardRect.left - gameAreaRect.left + cardRect.width / 2;
+                        const y = cardRect.top - gameAreaRect.top + cardRect.height / 2;
+                        
+                        particle.style.left = `${x}px`;
+                        particle.style.top = `${y}px`;
+                        
+                        gameArea.appendChild(particle);
+                        
+                        const angle = Math.random() * Math.PI * 2;
+                        const speed = 1.2 + Math.random() * 2.0;
+                        const vx = Math.cos(angle) * speed;
+                        const vy = Math.sin(angle) * speed;
+                        let life = 50 + Math.random() * 30;
+                        
+                        const animateParticle = () => {
+                            if (life <= 0) {
+                                particle.remove();
+                                return;
+                            }
+                            
+                            life--;
+                            const currentX = parseFloat(particle.style.left) + vx;
+                            const currentY = parseFloat(particle.style.top) + vy;
+                            
+                            particle.style.left = `${currentX}px`;
+                            particle.style.top = `${currentY}px`;
+                            particle.style.opacity = life / 80;
+                            particle.style.transform = `scale(${life / 80})`;
+                            
+                            requestAnimationFrame(animateParticle);
+                        };
+                        
+                        requestAnimationFrame(animateParticle);
+                    }
+                }
+            }
+            
+            // 初始化游戏 - 彻底解决遮挡问题
+            function initGame() {
+                cards.forEach(card => card.element?.remove());
+                cards = [];
+                cardIdCounter = 0;
+                
+                selectedCard = null;
+                score = 0;
+                timeLeft = 60;
+                gameActive = false;
+                remainingPairs = 10;
+                
+                clearInterval(gameTimer);
+                updateUI();
+                startBtn.disabled = false;
+                
+                // 卡片尺寸和布局参数 - 彻底优化，确保无遮挡
+                let cardWidth, cardHeight, margin;
+                const gameAreaWidth = gameArea.offsetWidth;
+                
+                // 根据屏幕宽度动态调整参数
+                if (window.innerWidth >= 1024) {
+                    cardWidth = 100;
+                    cardHeight = 60;
+                    margin = 30; // 大幅增加间距
+                } else if (window.innerWidth >= 769) {
+                    cardWidth = 90;
+                    cardHeight = 55;
+                    margin = 25;
+                } else {
+                    cardWidth = 60;
+                    cardHeight = 45;
+                    margin = 18; // 手机端增加间距
+                }
+                
+                // 计算5列布局的起始X位置，确保左右留出足够空间
+                const totalWidth = 5 * cardWidth + 4 * margin;
+                const startX = Math.max(15, (gameAreaWidth - totalWidth) / 2); // 确保最小边距
+                
+                // 调整上下区域位置，增加垂直间距
+                const funcStartY = 60; // 函数区起始位置
+                const derivStartY = 260; // 导数区起始位置（大幅增加与函数区的间距）
+                
+                // 复制并打乱函数对（取前10对）
+                const shuffledPairs = [...functionPairs]
+                    .sort(() => Math.random() - 0.5)
+                    .slice(0, 10);
+                
+                // 创建函数卡片（5列2行）
+                const funcCards = shuffledPairs.map((pair, index) => ({
+                    text: pair.func,
+                    type: 'func',
+                    colorClass: functionColorPool[index]
+                })).sort(() => Math.random() - 0.5);
+                
+                // 创建导数卡片（5列2行）
+                const derivativeCards = shuffledPairs.map((pair, index) => ({
+                    text: pair.derivative,
+                    type: 'derivative',
+                    colorClass: derivativeColorPool[index]
+                })).sort(() => Math.random() - 0.5);
+                
+                // 添加函数卡片（5列2行布局）
+                funcCards.forEach((cardData, index) => {
+                    const row = Math.floor(index / 5); // 5列一行，共2行
+                    const col = index % 5;
+                    const x = startX + col * (cardWidth + margin);
+                    const y = funcStartY + row * (cardHeight + margin);
+                    
+                    const card = new Card(
+                        cardIdCounter++,
+                        cardData.text,
+                        x,
+                        y,
+                        cardWidth,
+                        cardHeight,
+                        cardData.type,
+                        cardData.colorClass
+                    ).createElement();
+                    
+                    cards.push(card);
+                });
+                
+                // 添加导数卡片（5列2行布局）
+                derivativeCards.forEach((cardData, index) => {
+                    const row = Math.floor(index / 5); // 5列一行，共2行
+                    const col = index % 5;
+                    const x = startX + col * (cardWidth + margin);
+                    const y = derivStartY + row * (cardHeight + margin);
+                    
+                    const card = new Card(
+                        cardIdCounter++,
+                        cardData.text,
+                        x,
+                        y,
+                        cardWidth,
+                        cardHeight,
+                        cardData.type,
+                        cardData.colorClass
+                    ).createElement();
+                    
+                    cards.push(card);
+                });
+            }
+            
+            // 更新UI显示
+            function updateUI() {
+                scoreElement.textContent = score;
+                timerElement.textContent = timeLeft;
+                remainingElement.textContent = remainingPairs * 2;
+            }
+            
+            // 开始游戏
+            function startGame() {
+                if (gameActive) return;
+                
+                gameActive = true;
+                startBtn.disabled = true;
+                
+                gameTimer = setInterval(() => {
+                    timeLeft--;
+                    updateUI();
+                    
+                    if (timeLeft <= 0) {
+                        endGame(false);
+                    }
+                }, 1000);
+            }
+            
+            // 结束游戏
+            function endGame(isWin) {
+                gameActive = false;
+                clearInterval(gameTimer);
+                startBtn.disabled = false;
+                
+                setTimeout(() => {
+                    if (isWin) {
+                        alert(`🎉 恭喜！你赢了！\n🏆 最终得分: ${score}\n⏱️ 剩余时间: ${timeLeft}秒`);
+                    } else {
+                        alert(`⏰ 游戏结束！\n🏅 最终得分: ${score}\n💡 再试一次，挑战更高分！`);
+                    }
+                }, 500);
+            }
+            
+            // 事件监听
+            startBtn.addEventListener('click', startGame);
+            resetBtn.addEventListener('click', initGame);
+            
+            // 窗口大小变化时重新初始化
+            window.addEventListener('resize', () => {
+                clearTimeout(window.resizeTimer);
+                window.resizeTimer = setTimeout(initGame, 300);
+            });
+            
+            // 初始化游戏
+            initGame();
+        });
+    </script>
+</body>
+</html>
